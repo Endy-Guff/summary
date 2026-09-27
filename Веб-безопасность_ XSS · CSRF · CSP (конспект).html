@@ -1,0 +1,335 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>Конспект по веб-безопасности для Senior Frontend</h1>
+<h2>XSS · CSRF · CSP</h2>
+<blockquote>
+<p>Три темы, которые связаны между собой сильнее, чем кажется: XSS ломает почти любую защиту (включая CSRF-токены), CSP — это защита в глубину именно от XSS, а CSRF живёт на границе того, как браузер отправляет куки. Разбираем каждую по схеме: <strong>что это → как влияет → как делают → как защищаться</strong>.</p>
+</blockquote>
+<hr>
+<h1>1. XSS (Cross-Site Scripting)</h1>
+<h2>1.1 Что это</h2>
+<p>XSS — это инъекция, при которой атакующий заставляет <strong>браузер жертвы</strong> выполнить чужой JavaScript в контексте доверенного сайта (в его origin). Ключевое: код исполняется от имени сайта, а значит имеет доступ ко всему, к чему имеет доступ сайт — куки (не HttpOnly), <code>localStorage</code>, DOM, токены, возможность делать запросы к API с куками пользователя.</p>
+<p>Корень проблемы всегда один: <strong>данные, которыми управляет злоумышленник, попадают в исполняемый контекст без корректного экранирования/санитизации.</strong></p>
+<h2>1.2 Типы XSS</h2>
+<h3>Reflected (отражённый)</h3>
+<p>Payload приходит в запросе (обычно query-параметр) и сразу «отражается» в HTML-ответе без экранирования.</p>
+<pre><code>https://site.com/search?q=&lt;script&gt;steal()&lt;/script&gt;
+</code></pre>
+<p>Сервер вставляет <code>q</code> в страницу как есть → скрипт исполняется. Одноразовый: жертву нужно заманить по ссылке (фишинг, реклама). Не сохраняется.</p>
+<h3>Stored / Persistent (хранимый)</h3>
+<p>Payload сохраняется на сервере (комментарий, имя профиля, сообщение в чате, поле в БД) и отдаётся <strong>всем</strong>, кто откроет страницу. Опаснее всего: не нужна специальная ссылка, поражает всех посетителей, может превратиться в самораспространяющегося червя (как знаменитый Samy в MySpace).</p>
+<p><strong>Blind XSS</strong> — подвид хранимого: payload срабатывает не там, где введён, а в другом интерфейсе (например, в админке, куда попадают заявки поддержки). Атакующий не видит результат сразу.</p>
+<h3>DOM-based</h3>
+<p>Уязвимость целиком в <strong>клиентском коде</strong>. Сервер может вообще не участвовать — небезопасные данные из «источника» (source) попадают в опасный «сток» (sink) прямо в JS.</p>
+<pre><code class="language-js">// source: location.hash → sink: innerHTML
+document.getElementById(&#39;out&#39;).innerHTML = decodeURIComponent(location.hash.slice(1));
+// site.com/page#&lt;img src=x onerror=alert(document.cookie)&gt;
+</code></pre>
+<p>Особенность: payload часто в <code>#hash</code>, который <strong>не отправляется на сервер</strong>, поэтому серверный WAF/логи его не видят.</p>
+<h3>Mutation XSS (mXSS)</h3>
+<p>Браузер при парсинге «мутирует» HTML, и то, что казалось безопасным после санитизации, после реинсёрта в DOM превращается в исполняемый код. Классическая головная боль для санитайзеров — поэтому не пишут свои, а берут проверенный DOMPurify.</p>
+<h2>1.3 Sources и Sinks (must-know для DOM XSS)</h2>
+<p><strong>Источники (управляемые атакующим данные):</strong>
+<code>location</code> (<code>href</code>, <code>search</code>, <code>hash</code>, <code>pathname</code>), <code>document.URL</code>, <code>document.referrer</code>, <code>window.name</code>, <code>postMessage</code> data, данные из <code>localStorage</code>/<code>sessionStorage</code>, ответы API, <code>document.cookie</code>.</p>
+<p><strong>Опасные стоки (куда нельзя лить недоверенное):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Сток</th>
+<th>Почему опасен</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>element.innerHTML</code> / <code>outerHTML</code></td>
+<td>Парсит и исполняет HTML</td>
+</tr>
+<tr>
+<td><code>document.write</code> / <code>writeln</code></td>
+<td>То же</td>
+</tr>
+<tr>
+<td><code>eval</code>, <code>Function()</code></td>
+<td>Исполняет строку как код</td>
+</tr>
+<tr>
+<td><code>setTimeout</code>/<code>setInterval</code> со <strong>строкой</strong></td>
+<td>Скрытый eval</td>
+</tr>
+<tr>
+<td><code>element.insertAdjacentHTML</code></td>
+<td>Парсит HTML</td>
+</tr>
+<tr>
+<td><code>location = ...</code>, <code>location.href = ...</code></td>
+<td><code>javascript:</code> URI</td>
+</tr>
+<tr>
+<td><code>a.href</code>, <code>iframe.src</code> = <code>javascript:...</code></td>
+<td>Исполнение по клику</td>
+</tr>
+<tr>
+<td><code>element.setAttribute('onclick', ...)</code></td>
+<td>Инлайн-обработчик</td>
+</tr>
+<tr>
+<td><code>jQuery.html()</code>, <code>$(userInput)</code></td>
+<td>Обёртки над innerHTML</td>
+</tr>
+<tr>
+<td>Angular/Vue/React escape-hatches</td>
+<td>см. ниже</td>
+</tr>
+</tbody>
+</table>
+<h2>1.4 На что влияет (impact)</h2>
+<ul>
+<li><strong>Кража сессии</strong> — <code>document.cookie</code> → отправка на сервер атакующего → захват аккаунта (если куки не HttpOnly).</li>
+<li><strong>Кража токенов</strong> из <code>localStorage</code>/<code>sessionStorage</code> (одна из причин, почему хранить JWT в localStorage спорно).</li>
+<li><strong>Обход CSRF-защиты</strong> — XSS выполняется в origin сайта, читает CSRF-токен из DOM и делает «легитимный» запрос.</li>
+<li><strong>Keylogging и фишинг</strong> — подмена формы логина, перехват ввода.</li>
+<li><strong>Действия от имени пользователя</strong> — перевод денег, смена пароля/почты, публикация.</li>
+<li><strong>Дефейс, редирект, майнинг, распространение (worm).</strong></li>
+<li>Полный <strong>захват клиентской сессии</strong> — по сути злоумышленник управляет вкладкой пользователя.</li>
+</ul>
+<h2>1.5 Как защищаться (по приоритету)</h2>
+<p><strong>1) Контекстно-зависимое экранирование вывода.</strong> Экранирование зависит от того, куда вставляются данные:</p>
+<ul>
+<li>HTML-контекст: <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>&quot;</code>, <code>'</code> → HTML-entities.</li>
+<li>Контекст атрибута: обязательно кавычки + экранирование.</li>
+<li>JS-контекст: нельзя просто вставлять в <code>&lt;script&gt;</code> — нужен JSON-энкодинг/экранирование.</li>
+<li>URL-контекст: <code>encodeURIComponent</code>, плюс валидация схемы (запрет <code>javascript:</code>).</li>
+<li>CSS-контекст: свои правила экранирования.</li>
+</ul>
+<p>Одно универсальное экранирование не работает — контекст решает всё.</p>
+<p><strong>2) Использовать авто-экранирование фреймворков и не ломать его.</strong></p>
+<ul>
+<li><strong>React</strong>: <code>{value}</code> в JSX экранируется автоматически. Дыра — <code>dangerouslySetInnerHTML</code>. Также опасны <code>href={userUrl}</code> (может быть <code>javascript:</code>) и рендер в <code>ref</code>-манипуляциях через <code>innerHTML</code>.</li>
+<li><strong>Vue</strong>: <code>{{ }}</code> экранирует. Дыра — <code>v-html</code>. Опасны динамические <code>:href</code>.</li>
+<li><strong>Angular</strong>: по умолчанию экранирует и имеет встроенный sanitizer. Дыры — <code>[innerHTML]</code> с обходом, <code>bypassSecurityTrustHtml/Url/Script/ResourceUrl</code>.</li>
+</ul>
+<p>Правило: любой escape-hatch (<code>dangerouslySetInnerHTML</code>, <code>v-html</code>, <code>bypassSecurityTrust*</code>) — это место, где <strong>обязательна</strong> санитизация.</p>
+<p><strong>3) Санитизация HTML там, где реально нужен HTML от пользователя (комментарии, WYSIWYG).</strong></p>
+<pre><code class="language-js">import DOMPurify from &#39;dompurify&#39;;
+el.innerHTML = DOMPurify.sanitize(userHtml);
+</code></pre>
+<p>Никогда не писать свой санитайзер и regex-«очистку» — mXSS и обходы съедят его.</p>
+<p><strong>4) Избегать опасных стоков.</strong> Вместо <code>innerHTML</code> — <code>textContent</code>. Вместо <code>setTimeout(&quot;code&quot;)</code> — <code>setTimeout(fn)</code>. Никогда <code>eval</code>/<code>new Function</code> на пользовательских данных.</p>
+<p><strong>5) Валидация ввода по allowlist</strong> (не blacklist) — как дополнительный слой, но <strong>не как основная защита</strong> (основная — экранирование вывода).</p>
+<p><strong>6) HttpOnly-куки</strong> — JS не может прочитать такую куку, значит XSS не украдёт сессию через <code>document.cookie</code>. Плюс <code>Secure</code> и <code>SameSite</code>.</p>
+<p><strong>7) Trusted Types</strong> (Chrome/Edge) — политика, запрещающая передавать в опасные стоки обычные строки; только объекты, прошедшие через политику. Радикально убивает DOM-XSS.</p>
+<pre><code>Content-Security-Policy: require-trusted-types-for &#39;script&#39;;
+</code></pre>
+<p><strong>8) CSP как защита в глубину</strong> — см. раздел 3. Если экранирование где-то пропустили, строгий CSP не даст инлайн-скрипту исполниться.</p>
+<hr>
+<h1>2. CSRF (Cross-Site Request Forgery)</h1>
+<h2>2.1 Что это</h2>
+<p>CSRF заставляет <strong>аутентифицированного</strong> пользователя выполнить нежелательное <strong>изменяющее состояние</strong> действие на сайте, где он залогинен, без его ведома. Атака эксплуатирует то, что <strong>браузер автоматически прикладывает куки</strong> к запросу на сайт — независимо от того, с какой страницы этот запрос инициирован.</p>
+<p>Ключевое отличие от XSS: при CSRF атакующий <strong>не</strong> исполняет свой код на сайте и <strong>не читает ответ</strong> (мешает Same-Origin Policy). Он лишь «вслепую» отправляет запрос, полагаясь на куки жертвы.</p>
+<h2>2.2 Предусловия для успешной CSRF</h2>
+<ol>
+<li>Действие меняет состояние (перевод, смена пароля/почты, покупка).</li>
+<li>Аутентификация основана на <strong>куках</strong> (или Basic-auth), которые браузер шлёт автоматически.</li>
+<li>В запросе нет непредсказуемых параметров, которые атакующий не может угадать (то есть нет CSRF-токена).</li>
+</ol>
+<p>Если хоть одно не выполнено — классический CSRF не проходит.</p>
+<h2>2.3 Как делают</h2>
+<p><strong>GET (если действие меняет состояние через GET — грубая ошибка бэкенда):</strong></p>
+<pre><code class="language-html">&lt;img src=&#34;https://bank.com/transfer?to=attacker&amp;amount=10000&#34;&gt;
+</code></pre>
+<p>Просто загрузка «картинки» отправляет запрос с куками жертвы.</p>
+<p><strong>POST через авто-сабмит формы:</strong></p>
+<pre><code class="language-html">&lt;form action=&#34;https://bank.com/transfer&#34; method=&#34;POST&#34; id=&#34;f&#34;&gt;
+  &lt;input type=&#34;hidden&#34; name=&#34;to&#34; value=&#34;attacker&#34;&gt;
+  &lt;input type=&#34;hidden&#34; name=&#34;amount&#34; value=&#34;10000&#34;&gt;
+&lt;/form&gt;
+&lt;script&gt;document.getElementById(&#39;f&#39;).submit();&lt;/script&gt;
+</code></pre>
+<p>Жертва заходит на страницу атакующего — форма сабмитится сама, браузер приложил куки <code>bank.com</code>.</p>
+<p>Важно: обычная HTML-форма может слать только <code>application/x-www-form-urlencoded</code>, <code>multipart/form-data</code>, <code>text/plain</code>. Чтобы отправить <code>application/json</code>, нужен <code>fetch</code>/XHR, а это уже упирается в CORS и preflight — что само по себе становится защитой (см. ниже).</p>
+<h2>2.4 На что влияет</h2>
+<p>Любое изменяющее действие: смена email/пароля (→ захват аккаунта), перевод средств, оформление заказа, изменение настроек приватности, добавление админа. Прочитать данные атакующий обычно не может (SOP не отдаёт ответ), поэтому CSRF — это про <strong>действия</strong>, а не про <strong>утечку</strong>.</p>
+<h2>2.5 Как защищаться</h2>
+<p><strong>1) SameSite-куки (современная база).</strong></p>
+<pre><code>Set-Cookie: session=...; SameSite=Lax; Secure; HttpOnly
+</code></pre>
+<ul>
+<li><code>Strict</code> — кука не шлётся ни при каких кросс-сайт запросах (даже переход по ссылке). Максимальная защита, но ломает UX (перешёл по ссылке из письма — не залогинен).</li>
+<li><code>Lax</code> — кука шлётся при top-level навигации GET-ом, но не при кросс-сайт POST/<code>img</code>/<code>fetch</code>. Хороший баланс, сейчас это <strong>дефолт</strong> в Chrome. Убивает большинство CSRF из коробки.</li>
+<li><code>None</code> — шлётся всегда (обязательно с <code>Secure</code>). Нужно для намеренно кросс-сайтовых сценариев.</li>
+</ul>
+<p>SameSite=Lax по умолчанию закрыл огромный пласт CSRF, <strong>но не заменяет токены полностью</strong> (edge-кейсы, старые браузеры, GET-эндпоинты, method override).</p>
+<p><strong>2) CSRF-токены (Synchronizer Token Pattern).</strong>
+Сервер генерирует непредсказуемый токен, привязанный к сессии, кладёт его в форму/страницу; клиент шлёт его обратно (в поле формы или заголовке); сервер сверяет. Атакующий не может узнать/угадать токен и не может прочитать его из чужого origin (SOP). Золотой стандарт для форм.</p>
+<p><strong>3) Double-Submit Cookie.</strong>
+Токен кладётся и в куку, и в тело/заголовок запроса; сервер сверяет их равенство. Не требует хранения на сервере (stateless). Нюанс: уязвим, если атакующий может установить куку на поддомен — поэтому используют подписанные/<code>__Host-</code> куки.</p>
+<p><strong>4) Проверка заголовков Origin / Referer.</strong>
+Сервер проверяет, что запрос пришёл со своего origin. Дёшево и эффективно как доп. слой; минус — Referer иногда режется прокси/настройками приватности, поэтому не единственная защита.</p>
+<p><strong>5) Custom-заголовок для JSON API + CORS.</strong>
+SPA, которая шлёт <code>X-Requested-With</code> или свой заголовок через <code>fetch</code>, автоматически защищена: кросс-сайтовый запрос с кастомным заголовком требует CORS-preflight, который сервер атакующего не пройдёт. Плюс JSON-эндпоинты нельзя вызвать простой HTML-формой.</p>
+<p><strong>6) GET никогда не меняет состояние.</strong> Все изменяющие операции — POST/PUT/PATCH/DELETE. Это архитектурная гигиена, закрывающая <code>&lt;img&gt;</code>-вектор.</p>
+<p><strong>7) Ре-аутентификация / step-up</strong> для критичных действий (смена пароля, перевод) — запросить текущий пароль или 2FA.</p>
+<h2>2.6 CSRF ⟷ XSS</h2>
+<p>Если на сайте есть XSS, <strong>CSRF-токены не помогают</strong>: злоумышленный скрипт исполняется в origin, читает токен из DOM и делает валидный запрос. Поэтому XSS — приоритет №1; без него CSRF-защита имеет смысл.</p>
+<hr>
+<h1>3. CSP (Content Security Policy)</h1>
+<h2>3.1 Что это</h2>
+<p>CSP — механизм защиты в глубину: HTTP-заголовок (или <code>&lt;meta&gt;</code>), который говорит браузеру, <strong>откуда</strong> разрешено грузить и исполнять ресурсы (скрипты, стили, картинки, шрифты, фреймы, соединения). Главная ценность — <strong>резко снижает ущерб от XSS</strong>: даже если инъекция прошла, строгий CSP не даст исполниться инлайн-скрипту или загрузиться скрипту с чужого домена.</p>
+<p>Задаётся заголовком:</p>
+<pre><code>Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39;; object-src &#39;none&#39;; base-uri &#39;none&#39;
+</code></pre>
+<p><code>&lt;meta http-equiv&gt;</code> тоже работает, но заголовок предпочтительнее (умеет <code>frame-ancestors</code>, <code>report-to</code>, применяется раньше).</p>
+<h2>3.2 Основные директивы</h2>
+<table>
+<thead>
+<tr>
+<th>Директива</th>
+<th>Контролирует</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default-src</code></td>
+<td>Фолбэк для всех <code>*-src</code>, если не заданы явно</td>
+</tr>
+<tr>
+<td><code>script-src</code></td>
+<td>Откуда грузятся/исполняются скрипты (ядро защиты от XSS)</td>
+</tr>
+<tr>
+<td><code>style-src</code></td>
+<td>Стили</td>
+</tr>
+<tr>
+<td><code>img-src</code></td>
+<td>Картинки</td>
+</tr>
+<tr>
+<td><code>connect-src</code></td>
+<td><code>fetch</code>/XHR/WebSocket/<code>sendBeacon</code></td>
+</tr>
+<tr>
+<td><code>font-src</code></td>
+<td>Шрифты</td>
+</tr>
+<tr>
+<td><code>frame-src</code></td>
+<td>Что можно вставлять во фреймы</td>
+</tr>
+<tr>
+<td><code>frame-ancestors</code></td>
+<td>Кто может встроить <strong>нас</strong> во фрейм (анти-clickjacking, заменяет <code>X-Frame-Options</code>)</td>
+</tr>
+<tr>
+<td><code>base-uri</code></td>
+<td>Ограничивает <code>&lt;base&gt;</code> (защита от подмены относительных URL)</td>
+</tr>
+<tr>
+<td><code>form-action</code></td>
+<td>Куда можно сабмитить формы</td>
+</tr>
+<tr>
+<td><code>object-src</code></td>
+<td><code>&lt;object&gt;</code>/<code>&lt;embed&gt;</code> (лучше <code>'none'</code>)</td>
+</tr>
+<tr>
+<td><code>report-to</code> / <code>report-uri</code></td>
+<td>Куда слать отчёты о нарушениях</td>
+</tr>
+</tbody>
+</table>
+<h2>3.3 Источники (значения)</h2>
+<ul>
+<li><code>'self'</code> — свой origin.</li>
+<li><code>'none'</code> — ничего.</li>
+<li><code>'unsafe-inline'</code> — разрешает инлайн-скрипты/стили и <code>onclick</code>. <strong>Убивает смысл CSP против XSS</strong> — избегать.</li>
+<li><code>'unsafe-eval'</code> — разрешает <code>eval</code>/<code>new Function</code>. Избегать.</li>
+<li><code>https://cdn.example.com</code> — host-allowlist (хрупко: если на CDN есть JSONP/gadget — обход).</li>
+<li><code>'nonce-&lt;random&gt;'</code> — одноразовое случайное значение на каждый ответ; исполняются только скрипты с этим <code>nonce</code>.</li>
+<li><code>'sha256-&lt;hash&gt;'</code> — разрешить конкретный инлайн-скрипт по хешу.</li>
+<li><code>'strict-dynamic'</code> — доверять скриптам, которые загрузил уже доверенный (по nonce/hash) скрипт; при этом host-allowlist игнорируется. Основа современного «строгого» CSP.</li>
+</ul>
+<h2>3.4 Nonce-based CSP (рекомендуемый подход)</h2>
+<pre><code>Content-Security-Policy:
+  script-src &#39;nonce-r4nd0m&#39; &#39;strict-dynamic&#39;;
+  object-src &#39;none&#39;;
+  base-uri &#39;none&#39;;
+</code></pre>
+<pre><code class="language-html">&lt;script nonce=&#34;r4nd0m&#34; src=&#34;/app.js&#34;&gt;&lt;/script&gt;
+</code></pre>
+<p>Плюсы: не нужен <code>'unsafe-inline'</code>, не нужен хрупкий allowlist доменов, <code>'strict-dynamic'</code> корректно разрешает динамически подгружаемые чанки. Nonce <strong>обязан</strong> быть криптослучайным и <strong>новым на каждый ответ</strong> — иначе бесполезен.</p>
+<h2>3.5 Частые ошибки и обходы</h2>
+<ul>
+<li><strong><code>'unsafe-inline'</code> в <code>script-src</code></strong> — сводит защиту от XSS к нулю.</li>
+<li><strong>Слишком широкий allowlist</strong> (<code>https:</code>, <code>*</code>, крупные CDN с JSONP) — атакующий находит на разрешённом домене endpoint, отдающий подконтрольный JS.</li>
+<li><strong>Забыли <code>object-src 'none'</code> и <code>base-uri</code></strong> — векторы обхода через <code>&lt;object&gt;</code>/<code>&lt;base&gt;</code>.</li>
+<li><strong>Nonce переиспользуется</strong> между запросами — предсказуем.</li>
+<li><strong>Только <code>&lt;meta&gt;</code></strong> — нет <code>frame-ancestors</code>/reporting.</li>
+<li>CSP не защищает от логических дыр, CSRF, утечки данных — это узкий инструмент против инъекции ресурсов, а не серебряная пуля.</li>
+</ul>
+<h2>3.6 Внедрение без боли</h2>
+<ol>
+<li>Начать с <strong>Report-Only</strong> — ничего не блокирует, только шлёт отчёты:
+<pre><code>Content-Security-Policy-Report-Only: script-src &#39;nonce-...&#39; &#39;strict-dynamic&#39;; report-to csp-endpoint
+</code></pre>
+</li>
+<li>Собрать нарушения, вычистить инлайны и внешние источники.</li>
+<li>Переключить на боевой <code>Content-Security-Policy</code>.</li>
+<li>Держать <code>report-to</code> включённым и в проде для мониторинга.</li>
+</ol>
+<h2>3.7 Clickjacking (бонус, тесно связан с CSP)</h2>
+<p>Атака, где ваш сайт грузят в невидимый iframe поверх «наживки», и жертва кликает по вашим кнопкам вслепую. Защита:</p>
+<pre><code>Content-Security-Policy: frame-ancestors &#39;none&#39;;   # или &#39;self&#39;
+X-Frame-Options: DENY                               # легаси, для старых браузеров
+</code></pre>
+<hr>
+<h1>4. Как всё связано (карта в голове senior)</h1>
+<ul>
+<li><strong>XSS</strong> — исполнение чужого кода в вашем origin. Самая опасная: ломает и SameSite, и CSRF-токены (код-то «свой»).</li>
+<li><strong>CSP</strong> — не предотвращает инъекцию, а <strong>ограничивает ущерб</strong> от XSS: инлайн/чужой скрипт не исполнится. Защита в глубину, не замена экранированию.</li>
+<li><strong>CSRF</strong> — про автоматическую отправку кук браузером. Лечится <strong>SameSite + токенами</strong>, но при наличии XSS теряет смысл.</li>
+<li><strong>HttpOnly</strong> отделяет куки от JS → XSS не украдёт сессию. <strong>Secure</strong> → только по HTTPS. <strong>SameSite</strong> → анти-CSRF.</li>
+<li>Правильный порядок приоритетов: <strong>сначала убить XSS</strong> (экранирование + фреймворк + DOMPurify + CSP + Trusted Types), потом <strong>закрыть CSRF</strong> (SameSite + токены), потом <strong>clickjacking</strong> (frame-ancestors).</li>
+</ul>
+<hr>
+<h1>5. Быстрые чек-листы</h1>
+<h2>XSS</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Вывод экранируется контекстно (HTML/attr/JS/URL/CSS).</li>
+<li><input disabled="" type="checkbox"> Авто-экранирование фреймворка не отключено без нужды.</li>
+<li><input disabled="" type="checkbox"> Каждый <code>dangerouslySetInnerHTML</code>/<code>v-html</code>/<code>bypassSecurityTrust*</code> санитизирован DOMPurify.</li>
+<li><input disabled="" type="checkbox"> Нет <code>eval</code>, <code>new Function</code>, <code>setTimeout(&quot;string&quot;)</code>, недоверенного в <code>innerHTML</code>.</li>
+<li><input disabled="" type="checkbox"> URL валидируются (нет <code>javascript:</code>).</li>
+<li><input disabled="" type="checkbox"> Куки <code>HttpOnly; Secure; SameSite</code>.</li>
+<li><input disabled="" type="checkbox"> Внедрён строгий CSP (nonce + strict-dynamic).</li>
+<li><input disabled="" type="checkbox"> (Опц.) Trusted Types включены.</li>
+</ul>
+<h2>CSRF</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Куки сессии <code>SameSite=Lax/Strict</code>.</li>
+<li><input disabled="" type="checkbox"> CSRF-токен на всех изменяющих формах.</li>
+<li><input disabled="" type="checkbox"> GET не меняет состояние.</li>
+<li><input disabled="" type="checkbox"> JSON API + кастомный заголовок / проверка Origin.</li>
+<li><input disabled="" type="checkbox"> Ре-аутентификация на критичных действиях.</li>
+</ul>
+<h2>CSP</h2>
+<ul>
+<li><input disabled="" type="checkbox"> <code>script-src</code> без <code>'unsafe-inline'</code>/<code>'unsafe-eval'</code>.</li>
+<li><input disabled="" type="checkbox"> <code>nonce</code> криптослучайный и новый на каждый ответ.</li>
+<li><input disabled="" type="checkbox"> <code>object-src 'none'</code>, <code>base-uri 'none'</code>, <code>frame-ancestors</code>.</li>
+<li><input disabled="" type="checkbox"> Начали с <code>Report-Only</code>, включён <code>report-to</code>.</li>
+</ul>
+<hr>
+<h1>6. Что могут спросить на собеседовании</h1>
+<ul>
+<li>Разница между Reflected / Stored / DOM-based XSS и почему DOM-XSS не видит сервер.</li>
+<li>Что такое source→sink и назвать 5 опасных стоков.</li>
+<li>Почему CSRF-токен бесполезен при наличии XSS.</li>
+<li>Как <code>SameSite=Lax</code> меняет модель угроз CSRF и почему он не отменяет токены.</li>
+<li>Почему <code>'unsafe-inline'</code> обнуляет CSP и как заменить его на nonce + <code>'strict-dynamic'</code>.</li>
+<li>Чем <code>frame-ancestors</code> лучше <code>X-Frame-Options</code>.</li>
+<li>Где хранить JWT: localStorage vs HttpOnly-cookie — плюсы/минусы (XSS vs CSRF trade-off).</li>
+<li>Что делает Trusted Types и от чего конкретно защищает.</li>
+</ul>
+
+</body></html>
