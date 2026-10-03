@@ -1,4 +1,5 @@
 import xssCsrfCspMd from '../notes/frontend/security/xss-csrf-csp.md?raw'
+import webVitalsMd from '../notes/frontend/performance/web-vitals.md?raw'
 import { parseMarkdown, mdToSearchText, extractHeadings, type Heading } from '../lib/markdown'
 
 // ── types ─────────────────────────────────────────────────────────────────────
@@ -44,6 +45,11 @@ export const categories: Category[] = [
         label: 'Безопасность',
         description: 'XSS, CSRF, CSP, CORS и другие аспекты веб-безопасности',
       },
+      {
+        id: 'performance',
+        label: 'Производительность',
+        description: 'Web Vitals, LCP, INP, CLS, оптимизация React и Next.js',
+      },
     ],
   },
   {
@@ -67,6 +73,18 @@ export const notes: Note[] = [
     html: parseMarkdown(xssCsrfCspMd),
     searchText: mdToSearchText(xssCsrfCspMd),
     headings: extractHeadings(xssCsrfCspMd),
+  },
+  {
+    id: 'web-vitals',
+    title: 'Web Vitals',
+    description: 'LCP, INP, CLS — Core Web Vitals для senior frontend. Как измерять, что чинить, мониторинг в проде',
+    categoryId: 'frontend',
+    topicId: 'performance',
+    tags: ['web vitals', 'cwv', 'lcp', 'inp', 'cls', 'производительность', 'react', 'next.js', 'lighthouse', 'rum', 'crux'],
+    rawMd: webVitalsMd,
+    html: parseMarkdown(webVitalsMd),
+    searchText: mdToSearchText(webVitalsMd),
+    headings: extractHeadings(webVitalsMd),
   },
 ]
 
