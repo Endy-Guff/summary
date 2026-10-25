@@ -1,5 +1,6 @@
 import xssCsrfCspMd from '../notes/frontend/security/xss-csrf-csp.md?raw'
 import webVitalsMd from '../notes/frontend/performance/web-vitals.md?raw'
+import renderingNextjsMd from '../notes/frontend/rendering/rendering-nextjs.md?raw'
 import { parseMarkdown, mdToSearchText, extractHeadings, type Heading } from '../lib/markdown'
 
 // ── types ─────────────────────────────────────────────────────────────────────
@@ -50,6 +51,11 @@ export const categories: Category[] = [
         label: 'Производительность',
         description: 'Web Vitals, LCP, INP, CLS, оптимизация React и Next.js',
       },
+      {
+        id: 'rendering',
+        label: 'Рендеринг',
+        description: 'Стратегии рендеринга: CSR, SSR, SSG, ISR, PPR, Server Components, Next.js Pages и App Router',
+      },
     ],
   },
   {
@@ -85,6 +91,18 @@ export const notes: Note[] = [
     html: parseMarkdown(webVitalsMd),
     searchText: mdToSearchText(webVitalsMd),
     headings: extractHeadings(webVitalsMd),
+  },
+  {
+    id: 'rendering-nextjs',
+    title: 'Стратегии рендеринга и Next.js',
+    description: 'CSR, SSR, SSG, ISR, PPR, Streaming, Server Components. Pages Router vs App Router. next/dynamic. Ловушки гидратации',
+    categoryId: 'frontend',
+    topicId: 'rendering',
+    tags: ['ssr', 'ssg', 'isr', 'ppr', 'csr', 'streaming', 'server components', 'next.js', 'app router', 'pages router', 'гидратация', 'рендеринг', 'next/dynamic', 'cache components'],
+    rawMd: renderingNextjsMd,
+    html: parseMarkdown(renderingNextjsMd),
+    searchText: mdToSearchText(renderingNextjsMd),
+    headings: extractHeadings(renderingNextjsMd),
   },
 ]
 
