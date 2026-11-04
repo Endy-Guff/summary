@@ -1,4 +1,5 @@
 import xssCsrfCspMd from '../notes/frontend/security/xss-csrf-csp.md?raw'
+import protsentsMd from '../notes/math/percentages/protsenty.md?raw'
 import webVitalsMd from '../notes/frontend/performance/web-vitals.md?raw'
 import renderingNextjsMd from '../notes/frontend/rendering/rendering-nextjs.md?raw'
 import { parseMarkdown, mdToSearchText, extractHeadings, type Heading } from '../lib/markdown'
@@ -65,6 +66,19 @@ export const categories: Category[] = [
     icon: '◉',
     topics: [],
   },
+  {
+    id: 'math',
+    label: 'Математика',
+    description: 'Проценты, арифметика, алгебра — базовые математические концепции',
+    icon: '∑',
+    topics: [
+      {
+        id: 'percentages',
+        label: 'Проценты',
+        description: 'Формулы, типовые кейсы, ловушки и быстрый устный счёт',
+      },
+    ],
+  },
 ]
 
 export const notes: Note[] = [
@@ -103,6 +117,18 @@ export const notes: Note[] = [
     html: parseMarkdown(renderingNextjsMd),
     searchText: mdToSearchText(renderingNextjsMd),
     headings: extractHeadings(renderingNextjsMd),
+  },
+  {
+    id: 'protsenty',
+    title: 'Проценты',
+    description: 'Одна формула на все задачи. 13 типовых кейсов, ловушки с базой, быстрый устный счёт',
+    categoryId: 'math',
+    topicId: 'percentages',
+    tags: ['проценты', 'процент', 'формула', 'нндс', 'налог', 'скидка', 'сложные проценты', 'арифметика', 'математика', 'кейсы'],
+    rawMd: protsentsMd,
+    html: parseMarkdown(protsentsMd),
+    searchText: mdToSearchText(protsentsMd),
+    headings: extractHeadings(protsentsMd),
   },
 ]
 
