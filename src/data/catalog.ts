@@ -1,4 +1,5 @@
 import xssCsrfCspMd from '../notes/frontend/security/xss-csrf-csp.md?raw'
+import eventLoopMd from '../notes/backend/nodejs/event-loop-thread-pool.md?raw'
 import protsentsMd from '../notes/math/percentages/protsenty.md?raw'
 import webVitalsMd from '../notes/frontend/performance/web-vitals.md?raw'
 import renderingNextjsMd from '../notes/frontend/rendering/rendering-nextjs.md?raw'
@@ -64,7 +65,13 @@ export const categories: Category[] = [
     label: 'Backend',
     description: 'Серверная разработка: Node.js, базы данных, REST, архитектура',
     icon: '◉',
-    topics: [],
+    topics: [
+      {
+        id: 'nodejs',
+        label: 'Node.js',
+        description: 'Event loop, thread pool, асинхронность, worker_threads, производительность',
+      },
+    ],
   },
   {
     id: 'math',
@@ -117,6 +124,18 @@ export const notes: Note[] = [
     html: parseMarkdown(renderingNextjsMd),
     searchText: mdToSearchText(renderingNextjsMd),
     headings: extractHeadings(renderingNextjsMd),
+  },
+  {
+    id: 'event-loop-thread-pool',
+    title: 'Event Loop и Thread Pool в Node.js',
+    description: 'Как устроен event loop, фазы libuv, микрозадачи, thread pool, сетевой I/O, блокировки, worker_threads',
+    categoryId: 'backend',
+    topicId: 'nodejs',
+    tags: ['event loop', 'thread pool', 'libuv', 'node.js', 'nodejs', 'микрозадачи', 'nexttick', 'promise', 'setimmediate', 'settimeout', 'worker_threads', 'async', 'асинхронность', 'производительность'],
+    rawMd: eventLoopMd,
+    html: parseMarkdown(eventLoopMd),
+    searchText: mdToSearchText(eventLoopMd),
+    headings: extractHeadings(eventLoopMd),
   },
   {
     id: 'protsenty',
