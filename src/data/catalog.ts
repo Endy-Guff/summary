@@ -1,5 +1,6 @@
 import xssCsrfCspMd from '../notes/frontend/security/xss-csrf-csp.md?raw'
 import eventLoopMd from '../notes/backend/nodejs/event-loop-thread-pool.md?raw'
+import streamsMd from '../notes/backend/nodejs/streams.md?raw'
 import protsentsMd from '../notes/math/percentages/protsenty.md?raw'
 import webVitalsMd from '../notes/frontend/performance/web-vitals.md?raw'
 import renderingNextjsMd from '../notes/frontend/rendering/rendering-nextjs.md?raw'
@@ -136,6 +137,18 @@ export const notes: Note[] = [
     html: parseMarkdown(eventLoopMd),
     searchText: mdToSearchText(eventLoopMd),
     headings: extractHeadings(eventLoopMd),
+  },
+  {
+    id: 'streams',
+    title: 'Streams в Node.js',
+    description: 'Readable, Writable, Transform, Duplex. Backpressure, pipe, pipeline, for await, objectMode',
+    categoryId: 'backend',
+    topicId: 'nodejs',
+    tags: ['streams', 'стримы', 'node.js', 'nodejs', 'readable', 'writable', 'transform', 'duplex', 'pipe', 'pipeline', 'backpressure', 'buffer', 'chunk', 'objectmode', 'for await', 'fs'],
+    rawMd: streamsMd,
+    html: parseMarkdown(streamsMd),
+    searchText: mdToSearchText(streamsMd),
+    headings: extractHeadings(streamsMd),
   },
   {
     id: 'protsenty',
