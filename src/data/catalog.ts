@@ -1,4 +1,5 @@
 import xssCsrfCspMd from '../notes/frontend/security/xss-csrf-csp.md?raw'
+import siteSamesiteOriginMd from '../notes/frontend/security/site-samesite-origin.md?raw'
 import eventLoopMd from '../notes/backend/nodejs/event-loop-thread-pool.md?raw'
 import streamsMd from '../notes/backend/nodejs/streams.md?raw'
 import protsentsMd from '../notes/math/percentages/protsenty.md?raw'
@@ -90,6 +91,18 @@ export const categories: Category[] = [
 ]
 
 export const notes: Note[] = [
+  {
+    id: 'site-samesite-origin',
+    title: 'Site, Same-site, Origin, Referer, Top-level navigation',
+    description: 'Чем отличаются origin и site, как работает SameSite у cookie, что такое top-level navigation и зачем нужен Referer',
+    categoryId: 'frontend',
+    topicId: 'security',
+    tags: ['origin', 'site', 'same-site', 'samesite', 'cookie', 'referer', 'cors', 'csrf', 'top-level navigation', 'sec-fetch-site', 'браузер', 'безопасность', 'etld', 'public suffix list'],
+    rawMd: siteSamesiteOriginMd,
+    html: parseMarkdown(siteSamesiteOriginMd),
+    searchText: mdToSearchText(siteSamesiteOriginMd),
+    headings: extractHeadings(siteSamesiteOriginMd),
+  },
   {
     id: 'xss-csrf-csp',
     title: 'XSS · CSRF · CSP',
