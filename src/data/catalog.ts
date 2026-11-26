@@ -5,6 +5,7 @@ import streamsMd from '../notes/backend/nodejs/streams.md?raw'
 import protsentsMd from '../notes/math/percentages/protsenty.md?raw'
 import webVitalsMd from '../notes/frontend/performance/web-vitals.md?raw'
 import renderingNextjsMd from '../notes/frontend/rendering/rendering-nextjs.md?raw'
+import webpackChunksMd from '../notes/frontend/bundling/webpack-chunks-runtime.md?raw'
 import { parseMarkdown, mdToSearchText, extractHeadings, type Heading } from '../lib/markdown'
 
 // ── types ─────────────────────────────────────────────────────────────────────
@@ -59,6 +60,11 @@ export const categories: Category[] = [
         id: 'rendering',
         label: 'Рендеринг',
         description: 'Стратегии рендеринга: CSR, SSR, SSG, ISR, PPR, Server Components, Next.js Pages и App Router',
+      },
+      {
+        id: 'bundling',
+        label: 'Сборка',
+        description: 'Webpack, чанки, рантайм, code splitting, tree shaking, бандл-оптимизация',
       },
     ],
   },
@@ -162,6 +168,18 @@ export const notes: Note[] = [
     html: parseMarkdown(streamsMd),
     searchText: mdToSearchText(streamsMd),
     headings: extractHeadings(streamsMd),
+  },
+  {
+    id: 'webpack-chunks-runtime',
+    title: 'Webpack: чанки, рантайм, реестр модулей и синглтоны',
+    description: 'Модули vs чанки, рантайм и кэш, splitChunks, синглтоны, дублирование библиотек, особенности Next.js',
+    categoryId: 'frontend',
+    topicId: 'bundling',
+    tags: ['webpack', 'chunks', 'чанки', 'рантайм', 'runtime', 'module', 'модуль', 'splitchunks', 'code splitting', 'синглтон', 'singleton', 'дубли', 'next.js', 'dynamic import', 'lazy', 'bundle', 'бандл', 'tree shaking', 'turbopack', 'module federation'],
+    rawMd: webpackChunksMd,
+    html: parseMarkdown(webpackChunksMd),
+    searchText: mdToSearchText(webpackChunksMd),
+    headings: extractHeadings(webpackChunksMd),
   },
   {
     id: 'protsenty',

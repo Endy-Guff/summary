@@ -17,6 +17,7 @@ hljs.registerLanguage('css', css)
 hljs.registerLanguage('bash', bash)
 hljs.registerLanguage('sh', bash)
 hljs.registerLanguage('json', json)
+hljs.registerLanguage('jsx', javascript)
 
 function slugify(text: string): string {
   return text
